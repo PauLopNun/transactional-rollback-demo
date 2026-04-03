@@ -1,0 +1,784 @@
+{
+  "info": {
+    "_postman_id": "f0d3e9e8-0e36-4d2a-9e15-7fe7c8a6f3a1",
+    "name": "transactional_rollback-demo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get users (paginado)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/users?page=0&size=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get user by id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Paula\",\n  \"age\": 29\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/user",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update user",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Paula Actualizada\",\n  \"age\": 30\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/user/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete user",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search users by name",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/user/search?name=Ana",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "user",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "name",
+              "value": "Ana"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Demo Transaction Rollback",
+      "item": [
+        {
+          "name": "Run demo without transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 500', function () {",
+                  "  pm.response.to.have.status(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/no-tx?prefix={{demoPrefixNoTx}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "no-tx"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "{{demoPrefixNoTx}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Count users without transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('At least one record persisted without transaction', function () {",
+                  "  var count = Number(pm.response.text());",
+                  "  pm.expect(count).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/count?prefix={{demoPrefixNoTx}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "count"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "{{demoPrefixNoTx}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List users without transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response is an array', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "pm.test('Without transaction list contains records', function () {",
+                  "  pm.expect(pm.response.json().length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/users?prefix={{demoPrefixNoTx}}&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "{{demoPrefixNoTx}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Run demo with transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 500', function () {",
+                  "  pm.response.to.have.status(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/with-tx?prefix={{demoPrefixWithTx}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "with-tx"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "{{demoPrefixWithTx}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Count users with transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Rollback keeps count at zero with transaction', function () {",
+                  "  var count = Number(pm.response.text());",
+                  "  pm.expect(count).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/count?prefix={{demoPrefixWithTx}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "count"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "{{demoPrefixWithTx}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List users with transaction",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response is an array', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "pm.test('With transaction list is empty after rollback', function () {",
+                  "  pm.expect(pm.response.json().length).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/users?prefix={{demoPrefixWithTx}}&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "{{demoPrefixWithTx}}"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Demo Isolation Levels",
+      "item": [
+        {
+          "name": "Count allergies before",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Count is a valid number', function () {",
+                  "  pm.expect(Number(pm.response.text())).to.not.be.NaN;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/isolation/count?userId={{isolationUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "isolation",
+                "count"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{isolationUserId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add allergy attempt 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 409', function () {",
+                  "  pm.expect([200, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/isolation/add-allergy?userId={{isolationUserId}}&allergyName={{isolationAllergyName}}&sleepMs={{isolationSleepMs}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "isolation",
+                "add-allergy"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{isolationUserId}}"
+                },
+                {
+                  "key": "allergyName",
+                  "value": "{{isolationAllergyName}}"
+                },
+                {
+                  "key": "sleepMs",
+                  "value": "{{isolationSleepMs}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add allergy attempt 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Second attempt should be conflict', function () {",
+                  "  pm.expect(pm.response.code).to.eql(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/isolation/add-allergy?userId={{isolationUserId}}&allergyName={{isolationAllergyName}}_SECOND&sleepMs={{isolationSleepMs}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "isolation",
+                "add-allergy"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{isolationUserId}}"
+                },
+                {
+                  "key": "allergyName",
+                  "value": "{{isolationAllergyName}}_SECOND"
+                },
+                {
+                  "key": "sleepMs",
+                  "value": "{{isolationSleepMs}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Count allergies after",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Only one allergy allowed per user', function () {",
+                  "  pm.expect(Number(pm.response.text())).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/isolation/count?userId={{isolationUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "isolation",
+                "count"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{isolationUserId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List allergies by user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response is an array', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/isolation/list?userId={{isolationUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "isolation",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{isolationUserId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add user by age rule attempt 1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 409', function () {",
+                  "  pm.expect([200, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{sameAgeUserName}}\",\n  \"age\": {{sameAgeValue}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/demo/isolation/add-user-age-rule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "isolation",
+                "add-user-age-rule"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add user by age rule attempt 2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Second attempt should be conflict', function () {",
+                  "  pm.expect(pm.response.code).to.eql(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{sameAgeUserName}}_SECOND\",\n  \"age\": {{sameAgeValue}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/demo/isolation/add-user-age-rule",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "isolation",
+                "add-user-age-rule"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Count users by same age",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Only one user exists for the tested age', function () {",
+                  "  pm.expect(Number(pm.response.text())).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/demo/isolation/count-users-by-age?age={{sameAgeValue}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "demo",
+                "isolation",
+                "count-users-by-age"
+              ],
+              "query": [
+                {
+                  "key": "age",
+                  "value": "{{sameAgeValue}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "demoPrefixNoTx",
+      "value": "NO_TX"
+    },
+    {
+      "key": "demoPrefixWithTx",
+      "value": "WITH_TX"
+    },
+    {
+      "key": "isolationUserId",
+      "value": "1"
+    },
+    {
+      "key": "isolationAllergyName",
+      "value": "Pollen"
+    },
+    {
+      "key": "isolationSleepMs",
+      "value": "3000"
+    },
+    {
+      "key": "sameAgeUserName",
+      "value": "SameAgeDemo"
+    },
+    {
+      "key": "sameAgeValue",
+      "value": "77"
+    }
+  ]
+}
+
